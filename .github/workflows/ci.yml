@@ -1,0 +1,29 @@
+name: CI
+
+# The app no longer builds on current Xcode (Swift 3 project settings, AppKit APIs renamed since), so this parses the
+# Swift sources: it catches syntax errors, not type errors.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Parse the Swift sources
+        run: swiftc -parse -swift-version 4 KnightTouchBar2000/*.swift
